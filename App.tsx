@@ -1,9 +1,11 @@
 import { FaEye, FaTrash } from "react-icons/fa";
 import { Accion, Columna, DataTable, EstadoPill } from "./components/DataTable.js";
 import { FaPencil } from "react-icons/fa6";
+import { useState, useEffect } from "react";
 
-type FilaTarea = {
-  empleado: string;
+export type FilaTarea = {
+  empleado: string;     
+  imagen: string;         
   idTarea: string;
   tarea: string;
   inicio: string;
@@ -14,29 +16,29 @@ type FilaTarea = {
 };
 
 export default function App() {
-	// const [contador, setContador] = useState<number>(0);
-	// const [datos, setDatos] = useState<Array<RickMortyType>>([]);
+  const [datos, setDatos] = useState<FilaTarea[]>([]);
 
-	/* const obtenerDatos = async () => {
-		try {
-			const resultado = await fetch("https://rickandmortyapi.com/api/character").then((res) => res.json());
-			setDatos(resultado.results);
-		} catch (error) {
-			console.log("Existe un error al obtener datos", error);
-		}
-	};
-
-	useEffect(() => {
-		obtenerDatos();
-	}, []); */
-
- const columnas: Array<Columna<FilaTarea>> = [
-    { key: "empleado", encabezado: "Empleado", ordenable: true },
-    { key: "idTarea", encabezado: "ID Tarea", ordenable: true },
-    { key: "tarea", encabezado: "Detalles de Tarea", ordenable: true, ancho: "28%" },
-    { key: "inicio", encabezado: "Fecha Inicio", ordenable: true },
-    { key: "fin", encabezado: "Fecha Fin", ordenable: true },
-    { key: "conteo", encabezado: "Conteo", ordenable: true, alineacion: "center" },
+  const columnas: Array<Columna<FilaTarea>> = [
+    {
+      key: "empleado",
+      encabezado: "Personaje",
+      ordenable: true,
+      ancho: "25%",
+      render: (fila) => (
+        <div className="flex items-center gap-3">
+          <img
+            src={fila.imagen}
+            alt={fila.empleado}
+            className="w-10 h-10 rounded-full object-cover border border-slate-200 shadow-sm"
+          />
+          <span className="font-medium text-slate-800">{fila.empleado}</span>
+        </div>
+      ),
+    },
+    { key: "tarea", encabezado: "Especie", ordenable: true },
+    { key: "inicio", encabezado: "Género", ordenable: true },
+    { key: "fin", encabezado: "Origen", ordenable: true },
+    { key: "conteo", encabezado: "Ubicacion", ordenable: true, alineacion: "center" },
     {
       key: "estado",
       encabezado: "Estado",
@@ -45,34 +47,48 @@ export default function App() {
     },
   ];
 
-  // Datos de ejemplo
-  const datos: FilaTarea[] = [
-    { empleado: "John, Peterson", idTarea: "TID0002501", tarea: "Desarrollo Frontend", inicio: "12/09/2018", fin: "15/09/2018", conteo: 10, estado: "Completado", colorEstado: "verde" },
-    { empleado: "Nattali Rize", idTarea: "TID0002498", tarea: "Desarrollo Tema RWD", inicio: "28/08/2018", fin: "05/09/2018", conteo: 9, estado: "Completado", colorEstado: "verde" },
-    { empleado: "Jennifer Lawrence", idTarea: "TID0002497", tarea: "Desarrollo Frontend", inicio: "28/08/2018", fin: "05/09/2018", conteo: 7, estado: "Completado", colorEstado: "verde" },
-    { empleado: "Jason Statham", idTarea: "TID0002486", tarea: "Desarrollo Tema RWD", inicio: "20/08/2018", fin: "28/08/2018", conteo: 9, estado: "Completado", colorEstado: "verde" },
-    { empleado: "Selena Gomez", idTarea: "TID0002481", tarea: "Tema Wordpress", inicio: "15/08/2018", fin: "26/08/2018", conteo: 6, estado: "Completado", colorEstado: "verde" },
-  ];
-
-  // Acciones (ver, editar, eliminar)
   const acciones: Array<Accion<FilaTarea>> = [
-    { etiqueta: "Ver", icono: <FaEye size={16} />, onClick: (fila) => alert("Ver: " + fila.idTarea) },
-    { etiqueta: "Editar", icono: <FaPencil size={16} />, onClick: (fila) => alert("Editar: " + fila.idTarea) },
-    { etiqueta: "Eliminar", icono: <FaTrash size={16} />, onClick: (fila) => alert("Eliminar: " + fila.idTarea) },
+    { etiqueta: "Ver", icono: <FaEye size={16} />, onClick: (fila) => alert(JSON.stringify(fila, null, 2)) },
+    { etiqueta: "Editar", icono: <FaPencil size={16} />, onClick: (fila) => alert(`Editar: ${fila.empleado}`) },
+    { etiqueta: "Eliminar", icono: <FaTrash size={16} />, onClick: (fila) => alert(`Eliminar: ${fila.empleado}`) },
   ];
 
-  // Filtro visual (chip)
   const filtros = (
     <div className="flex items-center gap-2">
       <span className="px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-medium">
-        Estado : Completado
+        Fuente: Rick and Morty API
       </span>
     </div>
   );
 
+  useEffect(() => {
+  fetch("https://rickandmortyapi.com/api/character")
+    .then((res) => res.json())
+    .then((data) => {
+      const personajes = data.results.map((p: any) => ({
+        empleado: p.name,
+        imagen: p.image,
+        //idTarea: p.id.toString(),
+        tarea: p.species,
+        inicio: p.gender,
+        fin: p.origin.name,
+        conteo: p.location.name,
+        estado: p.status,
+        colorEstado:
+          p.status === "Alive"
+            ? "verde"
+            : p.status === "Dead"
+              ? "rojo"
+              : "gris",
+      }));
+      setDatos(personajes);
+    })
+    .catch((err) => console.error("Error al obtener personajes:", err));
+}, []);
+
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Bandeja de Tareas</h1>
+      <h1 className="text-2xl font-bold mb-4">Personajes de Rick and Morty</h1>
       <DataTable<FilaTarea>
         columnas={columnas}
         datos={datos}
@@ -84,3 +100,4 @@ export default function App() {
     </div>
   );
 }
+

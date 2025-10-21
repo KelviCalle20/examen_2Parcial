@@ -11,12 +11,12 @@ export default defineConfig({
 		 hmr: {
       protocol: 'ws',
       host: 'localhost',
-      clientPort: 5173,
+      clientPort: 5176,
     },
 	},
 	preview: {
 		host: true,
-		port: 5173,
+		port: 5176,
 		strictPort: true,
 		allowedHosts: ["wgjtpr-5173.csb.app"],
 	},
